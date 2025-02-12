@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+        #controls { margin: 10px; display: flex; gap: 10px; }
+        #controls input, #controls select, #resetBtn { padding: 5px; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input type="text" id="search" placeholder="Pesquisar local..." oninput="updateMarkers()">
+        <select id="filter" onchange="updateMarkers()">
+            <option value="all">Todos</option>
+            <option value="lot1">Lot1</option>
+            <option value="lot2">Lot2</option>
+            <option value="lot3">Lot3</option>
+        </select>
+        <button id="resetBtn" onclick="resetFilters()">Redefinir</button>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([45.9432, 24.9668], 6); // Centro da Romênia
+
+        var hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: 'Map data © Google'
+        });
+        hybridLayer.addTo(map);
+
+        var markersData = [
+            { name: "Lot1 - Sofia, Bulgária", coords: [42.6977, 23.3242], category: "lot1" },
+            { name: "Lot2 - Timisoara, Roménia", coords: [45.7489, 21.2087], category: "lot2" },
+            { name: "Lot3 - Sighetu Marmației, Roménia", coords: [47.9300, 23.8900], category: "lot3" },
+            { name: "2 MSS Moravita BCU", coords: [45.25365972891508, 21.26894588915076], category: "lot2" },
+            { name: "1 MSS Jimbolia BCU", coords: [45.801394529105764, 20.72230569591865], category: "lot2" },
+            { name: "1 MSS Lunga BCU", coords: [45.88010197034045, 20.585199995398487], category: "lot2" },
+            { name: "1 MSS Cruceni BCU", coords: [45.475372909993034, 20.866342379638265], category: "lot2" }
+        ];
+
+        var markersGroup = L.layerGroup().addTo(map);
+        var markers = {}; // Objeto para armazenar marcadores
+
+        function createMarkers() {
+            markersData.forEach(m => {
+                let marker = L.marker(m.coords).bindPopup(m.name);
+                markers[m.name] = marker;
+                markersGroup.addLayer(marker);
+            });
+        }
+
+        function updateMarkers() {
+            var filterValue = document.getElementById("filter").value;
+            var searchValue = document.getElementById("search").value.toLowerCase();
+            
+            markersGroup.clearLayers(); // Limpa os marcadores
+            
+            let bounds = L.latLngBounds();
+            let hasMarkers = false;
+            
+            markersData.forEach(m => {
+                if ((filterValue === "all" || m.category === filterValue) &&
+                    (m.name.toLowerCase().includes(searchValue))) {
+                    
+                    let marker = markers[m.name];
+                    markersGroup.addLayer(marker);
+                    bounds.extend(m.coords);
+                    hasMarkers = true;
+                }
+            });
+
+            if (bounds.isValid() && hasMarkers) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            } else {
+                map.setView([45.9432, 24.9668], 6); // Volta para visão inicial
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById("search").value = "";
+            document.getElementById("filter").value = "all";
+            updateMarkers();
+        }
+
+        createMarkers();
+        updateMarkers();
+    </script>
+</body>
+</html>
