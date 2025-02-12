@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="pt"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Mapa Interativo&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#map { height: 500px; width: 100%; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#controls { margin: 10px; display: flex; gap: 10px; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#controls input, #controls select, #resetBtn { padding: 5px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="controls"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;input type="text" id="search" placeholder="Pesquisar local..." oninput="updateMarkers()"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;select id="filter" onchange="updateMarkers()"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="all"&gt;Todos&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="lot1"&gt;Lot1&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="lot2"&gt;Lot2&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;option value="lot3"&gt;Lot3&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="resetBtn" onclick="resetFilters()"&gt;Redefinir&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="map"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/leaflet/dist/leaflet.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>var map = L.map('map').setView([45.9432, 24.9668], 6); // Centro da Romênia</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>var hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&amp;x={x}&amp;y={y}&amp;z={z}', {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],</p>
+<p class="p1"><span class="Apple-converted-space">            </span>attribution: 'Map data © Google'</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>hybridLayer.addTo(map);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>var markersData = [</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "Lot1 - Sofia, Bulgária", coords: [42.6977, 23.3242], category: "lot1" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "Lot2 - Timisoara, Roménia", coords: [45.7489, 21.2087], category: "lot2" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "Lot3 - Sighetu Marmației, Roménia", coords: [47.9300, 23.8900], category: "lot3" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "2 MSS Moravita BCU", coords: [45.25365972891508, 21.26894588915076], category: "lot2" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "1 MSS Jimbolia BCU", coords: [45.801394529105764, 20.72230569591865], category: "lot2" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "1 MSS Lunga BCU", coords: [45.88010197034045, 20.585199995398487], category: "lot2" },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{ name: "1 MSS Cruceni BCU", coords: [45.475372909993034, 20.866342379638265], category: "lot2" }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>var markersGroup = L.layerGroup().addTo(map);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>var markers = {}; // Objeto para armazenar marcadores</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function createMarkers() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>markersData.forEach(m =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let marker = L.marker(m.coords).bindPopup(m.name);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>markers[m.name] = marker;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>markersGroup.addLayer(marker);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function updateMarkers() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>var filterValue = document.getElementById("filter").value;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>var searchValue = document.getElementById("search").value.toLowerCase();</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>markersGroup.clearLayers(); // Limpa os marcadores</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let bounds = L.latLngBounds();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let hasMarkers = false;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>markersData.forEach(m =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if ((filterValue === "all" || m.category === filterValue) &amp;&amp;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>(m.name.toLowerCase().includes(searchValue))) {</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let marker = markers[m.name];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>markersGroup.addLayer(marker);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>bounds.extend(m.coords);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>hasMarkers = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (bounds.isValid() &amp;&amp; hasMarkers) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>map.fitBounds(bounds, { padding: [50, 50] });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>map.setView([45.9432, 24.9668], 6); // Volta para visão inicial</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function resetFilters() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById("search").value = "";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById("filter").value = "all";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateMarkers();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>createMarkers();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>updateMarkers();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
