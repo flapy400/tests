@@ -1,0 +1,90 @@
+<html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+        #controls { margin: 10px; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input type="text" id="search" placeholder="Pesquisar local..." oninput="searchMarkers()">
+        <select id="filter" onchange="filterMarkers()">
+            <option value="all">Todos</option>
+            <option value="lot1">Lot1</option>
+            <option value="lot2">Lot2</option>
+            <option value="lot3">Lot3</option>
+        </select>
+    </div>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([44.0, 25.0], 6); // Área da Roménia e Bulgária
+        
+        var hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: 'Map data © Google'
+        });
+        
+        hybridLayer.addTo(map);
+
+        var markers = [
+            { name: "Lot1 - Chisinau, Moldávia", coords: [47.0105, 28.8638], category: "lot1" },
+            { name: "1 Briceni, Moldova", coords: [48.3616, 27.0789], category: "lot1" },
+            { name: "1 Tocuz, Moldova", coords: [46.5684, 29.4205], category: "lot1" },
+            { name: "1 Tudora, Moldova", coords: [46.5065, 29.9083], category: "lot1" },
+            { name: "1 Ocnita, Moldova", coords: [48.4115, 27.4507], category: "lot1" },
+            { name: "Lot2 - Timisoara, Roménia", coords: [45.7489, 21.2087], category: "lot2" },
+            { name: "Lot3 - Sighetu Marmației, Roménia", coords: [47.9300, 23.8900], category: "lot3" },
+            { name: "1 Sighetu Marmatiei, Romania", coords: [47.9300, 23.8900], category: "lot3" },
+            { name: "1 Sarasau, Romania", coords: [47.9500, 23.7950], category: "lot3" },
+            { name: "2 MSS Moravita BCU", coords: [45.25365972891508, 21.26894588915076], category: "lot2" },
+            { name: "1 MSS Jimbolia BCU", coords: [45.801394529105764, 20.72230569591865], category: "lot2" },
+            { name: "1 MSS Lunga BCU", coords: [45.88010197034045, 20.585199995398487], category: "lot2" },
+            { name: "1 MSS Cruceni BCU", coords: [45.475372909993034, 20.866342379638265], category: "lot2" }
+        ];
+        
+        var markerObjects = [];
+        function addMarkers() {
+            markerObjects.forEach(m => map.removeLayer(m));
+            markerObjects = [];
+            
+            markers.forEach(m => {
+                var marker = L.marker(m.coords).addTo(map)
+                    .bindPopup(m.name);
+                marker.category = m.category;
+                marker.name = m.name.toLowerCase();
+                markerObjects.push(marker);
+            });
+        }
+        addMarkers();
+
+        function filterMarkers() {
+            var filter = document.getElementById("filter").value;
+            markerObjects.forEach(marker => {
+                if (filter === "all" || marker.category === filter) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+        }
+
+        function searchMarkers() {
+            var search = document.getElementById("search").value.toLowerCase();
+            markerObjects.forEach(marker => {
+                if (marker.name.includes(search)) {
+                    marker.addTo(map);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
