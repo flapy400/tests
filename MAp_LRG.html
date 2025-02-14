@@ -1,0 +1,114 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            position: absolute;
+            top: 50px; /* Height of the controls bar */
+            left: 0;
+            width: 100%;
+            bottom: 0;
+        }
+        #controls { 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex; 
+            justify-content: space-between; 
+            padding: 10px; 
+            background: #f8f8f8; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        input, select { 
+            padding: 8px; 
+            font-size: 16px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input type="text" id="search" placeholder="Search location..." oninput="updateMarkers()">
+        <select id="filter" onchange="updateMarkers()">
+            <option value="all">All</option>
+            <option value="lot1">Lot1</option>
+            <option value="lot2">Lot2</option>
+            <option value="lot3">Lot3</option>
+        </select>
+    </div>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([44.0, 25.0], 6);
+
+        var hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: 'Map data © Google'
+        }).addTo(map);
+
+        var markersData = [
+            { name: "Lot1 - Chisinau, Moldova", coords: [47.0105, 28.8638], category: "lot1" },
+            { name: "1 MSS Lot1 Briceni, Moldova", coords: [48.3616, 27.0789], category: "lot1" },
+            { name: "1 MSS Lot1 Tocuz, Moldova", coords: [46.5684, 29.4205], category: "lot1" },
+            { name: "1 MSS Lot1 Tudora, Moldova", coords: [46.5065, 29.9083], category: "lot1" },
+            { name: "1 MSS Lot1 Ocnita, Moldova", coords: [48.4115, 27.4507], category: "lot1" },
+            { name: "Lot2 - Timisoara, Romania", coords: [45.7489, 21.2087], category: "lot2" },
+            { name: "Lot3 - Sighetu Marmației, Romania", coords: [47.9300, 23.8900], category: "lot3" },
+            { name: "1 MSS Lot3 Sighetu Marmatiei, Romania", coords: [47.9300, 23.8900], category: "lot3" },
+            { name: "1 MSS Lot3 Sarasau, Romania", coords: [47.9500, 23.7950], category: "lot3" },
+            { name: "2 MSS Lot2 Moravita BCU", coords: [45.2537, 21.2689], category: "lot2" },
+            { name: "1 MSS Lot2 Jimbolia BCU", coords: [45.8014, 20.7223], category: "lot2" },
+            { name: "1 MSS Lot2 Lunga BCU", coords: [45.8801, 20.5852], category: "lot2" },
+            { name: "1 MSS Lot2 Cruceni BCU", coords: [45.4754, 20.8663], category: "lot2" }
+        ];
+
+        var markerLayer = L.layerGroup().addTo(map);
+        var markerObjects = [];
+
+        function createMarkers() {
+            markerLayer.clearLayers();
+            
+            markersData.forEach(data => {
+                var marker = L.marker(data.coords).bindPopup(data.name);
+                marker.category = data.category;
+                marker.name = data.name.toLowerCase();
+                markerObjects.push(marker);
+                markerLayer.addLayer(marker);
+            });
+        }
+        createMarkers();
+
+        function updateMarkers() {
+            var searchQuery = document.getElementById("search").value.toLowerCase();
+            var selectedCategory = document.getElementById("filter").value;
+
+            markerLayer.clearLayers();
+            
+            markerObjects.forEach(marker => {
+                var matchesCategory = (selectedCategory === "all" || marker.category === selectedCategory);
+                var matchesSearch = marker.name.includes(searchQuery);
+
+                if (matchesCategory && matchesSearch) {
+                    markerLayer.addLayer(marker);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
